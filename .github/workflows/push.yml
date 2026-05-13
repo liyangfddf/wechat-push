@@ -1,0 +1,36 @@
+name: 微信推送定时任务
+
+on:
+  schedule:
+    # 每天 8:00 - 22:00 每隔30分钟执行一次（北京时间）
+    # GitHub Actions 使用 UTC 时间，北京时间 = UTC+8
+    - cron: '*/30 0-14 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 缓存已推送记录
+        uses: actions/cache@v4
+        with:
+          path: sent_ids.json
+          key: sent-ids-${{ github.run_id }}
+          restore-keys: sent-ids-
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行推送
+        env:
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+        run: python main.py once
