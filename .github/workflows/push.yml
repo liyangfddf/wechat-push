@@ -1,4 +1,4 @@
-name: liy_wechat_push
+name: liy_wechat_push 
 
 on:
   schedule:
